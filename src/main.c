@@ -11,41 +11,12 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <time.h>
 #include <unistd.h>
 
-#define MAX_ERROR_MSG 0x1000
+#include "g_application.h"
 
-static void trigger(GSimpleAction *action,
-                    GVariant *parameter,
-                    gpointer window)
-{
-    const gchar *value = g_variant_get_string(parameter, NULL);
-    g_print("triggered: %s\n", value);
-}
-
-static GActionEntry app_entries[] = {{"trigger", trigger, "s", NULL, NULL}};
-
-static void activate(GApplication *application)
-{
-    g_application_hold(application);
-
-    g_action_map_add_action_entries(G_ACTION_MAP(application),
-                                    app_entries, G_N_ELEMENTS(app_entries),
-                                    application);
-
-    // notification customizing
-    GNotification *notification = g_notification_new("Lunch is ready");
-    g_notification_set_body(notification, "Today we have pancakes and salad, and fruit and cake for dessert");
-
-    // notification actions
-    g_notification_set_default_action(notification, "app.go-to-lunch");
-    g_notification_add_button_with_target(notification, "Trigger", "app.trigger", "s", "data");
-
-    // notification run
-    g_application_send_notification(application, "lunch-is-ready", notification);
-
-    g_application_release(application);
-}
+static GApplication *g_app;
 
 static char *first_match(regex_t *r, const char *to_match)
 {
@@ -108,7 +79,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    printf("user %s password %s server %s\n", user_address, user_password, mail_server);
+    // printf("user %s password %s server %s\n", user_address, user_password, mail_server);
 
     struct sockaddr_in server;
     struct hostent *host;
@@ -129,7 +100,7 @@ int main(int argc, char *argv[])
         printf("Failed on gethostbyname: %s.", hstrerror(h_errno));
         exit(EXIT_FAILURE);
     }
-    memcpy(&server.sin_addr, host->h_addr, host->h_length);
+    memcpy(&server.sin_addr, host->h_addr_list[0], host->h_length);
 
     if (connect(sock, (struct sockaddr *)&server, sizeof(server)) < 0)
     {
@@ -143,13 +114,13 @@ int main(int argc, char *argv[])
     {
         int packet_length = recv(sock, buffer, 512, 0);
         buffer[packet_length] = '\0';
-        printf("%s", buffer);
+        // printf("%s", buffer);
         if (packet_length != 512)
         {
             break;
         }
     }
-    printf("\n");
+    // printf("\n");
 
     sprintf(message, "1 LOGIN %s %s\r\n", user_address, user_password);
     if (write(sock, message, strlen(message)) < 0)
@@ -162,13 +133,13 @@ int main(int argc, char *argv[])
     {
         int packet_length = recv(sock, buffer, 512, 0);
         buffer[packet_length] = '\0';
-        printf("%s", buffer);
+        // printf("%s", buffer);
         if (packet_length != 512)
         {
             break;
         }
     }
-    printf("\n");
+    // printf("\n");
 
     sprintf(message, "1 STATUS INBOX (UNSEEN)\r\n");
     if (write(sock, message, strlen(message)) < 0)
@@ -180,38 +151,28 @@ int main(int argc, char *argv[])
     int packet_length = recv(sock, buffer, 512, 0);
     buffer[packet_length] = '\0';
 
-    printf("%s\n", buffer);
+    // printf("%s\n", buffer);
 
     regex_t r;
     const char *regex_text = ".*\\(UNSEEN ([[:digit:]]+)\\).*";
     int status = regcomp(&r, regex_text, REG_EXTENDED | REG_NEWLINE);
     if (status != 0)
     {
-        char error_message[MAX_ERROR_MSG];
-        regerror(status, &r, error_message, MAX_ERROR_MSG);
-        printf("Regex error compiling '%s': %s\n",
-               regex_text, error_message);
+        printf("Regex error compiling '%s'\n", regex_text);
         return 1;
     }
 
     const int unseen = atoi(first_match(&r, buffer));
 
-    printf("match: %d\n", unseen);
+    printf("Unseen: %d\n", unseen);
 
     regfree(&r);
     close(sock);
 
-    GApplication *app;
-    int g_status;
+    g_app = g_create("it.davidepucci.PaperBoy");
+    g_run(g_app);
+    sleep(10);
+    g_shutdown(g_app);
 
-    app = g_application_new("it.davidepucci.MailMan",
-                            G_APPLICATION_HANDLES_OPEN);
-    g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
-    // g_application_set_inactivity_timeout(app, 10000);
-
-    g_status = g_application_run(app, NULL, NULL);
-
-    g_object_unref(app);
-
-    return g_status;
+    return 0;
 }
