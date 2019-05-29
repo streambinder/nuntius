@@ -1,5 +1,6 @@
 #include <gio/gio.h>
 #include <pthread.h>
+#include <stdio.h>
 
 #include "g_triggers.h"
 

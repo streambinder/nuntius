@@ -1,6 +1,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <getopt.h>
 #include <gio/gio.h>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -14,9 +15,11 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "paperboy.h"
 #include "g_application.h"
 
 static GApplication *g_app;
+static char *config_path = "~/.config/paperboy/default.cfg";
 
 static char *first_match(regex_t *r, const char *to_match)
 {
@@ -51,33 +54,35 @@ static char *first_match(regex_t *r, const char *to_match)
 
 int main(int argc, char *argv[])
 {
+    account_t *account = malloc(sizeof(account_t));
+
     int opt = 0;
-
-    char *user_address;
-    char *user_password;
-    char *mail_server;
-
-    while ((opt = getopt(argc, argv, "u:p:h:")) != -1)
+    while ((opt = getopt(argc, argv, "u:p:h:c:")) != -1)
     {
         switch (opt)
         {
         case 'u':
-            user_address = optarg;
+            strcpy(account->address, optarg);
             break;
         case 'p':
-            user_password = optarg;
+            strcpy(account->password, optarg);
             break;
         case 'h':
-            mail_server = optarg;
+            strcpy(account->hostname, optarg);
+            break;
+        case 'c':
+            config_path = optarg;
             break;
         }
     }
 
-    if (user_address == NULL || user_password == NULL || mail_server == NULL)
+    if (account->address == NULL || account->password == NULL || account->hostname == NULL)
     {
         printf("Unknown credentials!\n");
         return 1;
     }
+
+    printf("%s / %s / %s\n", account->address, account->password, account->hostname);
 
     g_app = g_create("it.davidepucci.PaperBoy");
     g_run(g_app);
@@ -100,7 +105,7 @@ int main(int argc, char *argv[])
 
         server.sin_family = AF_INET;
         server.sin_port = htons(143);
-        host = gethostbyname(mail_server);
+        host = gethostbyname(account->hostname);
         if (host == NULL)
         {
             printf("Failed on gethostbyname: %s.", hstrerror(h_errno));
@@ -110,7 +115,7 @@ int main(int argc, char *argv[])
 
         if (connect(sock, (struct sockaddr *)&server, sizeof(server)) < 0)
         {
-            printf("Failed on connecting to server socket.");
+            printf("Failed on connecting to server socket.\n");
             return -1;
         }
 
@@ -128,10 +133,10 @@ int main(int argc, char *argv[])
         }
         // printf("\n");
 
-        sprintf(message, "1 LOGIN %s %s\r\n", user_address, user_password);
+        sprintf(message, "1 LOGIN %s %s\r\n", account->address, account->password);
         if (write(sock, message, strlen(message)) < 0)
         {
-            printf("Unable to send message.");
+            printf("Unable to send message.\n");
             return -1;
         }
 
@@ -150,7 +155,7 @@ int main(int argc, char *argv[])
         sprintf(message, "1 STATUS INBOX (UNSEEN)\r\n");
         if (write(sock, message, strlen(message)) < 0)
         {
-            printf("Unable to send message.");
+            printf("Unable to send message.\n");
             return -1;
         }
 
@@ -174,7 +179,7 @@ int main(int argc, char *argv[])
 
         char *notify_title = (char *)calloc(25, sizeof(char *));
         char *notify_body = (char *)calloc(150, sizeof(char *));
-        sprintf(notify_title, "Status for %s", user_address);
+        sprintf(notify_title, "Status for %s", account->address);
         sprintf(notify_body, "Emails unread %d", unseen);
         g_notify(g_app, notify_title, notify_body);
 
