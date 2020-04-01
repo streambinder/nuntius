@@ -1,8 +1,10 @@
+#include <stdlib.h>
+
 #include "account.h"
 
 static account_t *account_new()
 {
-	return (struct account_t *)malloc(sizeof(account_t));
+	return (account_t *)malloc(sizeof(account_t));
 }
 
 extern account_t *account_parse(char *address, char *password, char *hostname, char *url)
