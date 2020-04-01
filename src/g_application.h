@@ -5,4 +5,4 @@ static void g_activate(GApplication *application);
 
 extern GApplication *g_create();
 
-#endif /* GAPPLICATION_H */
+#endif /* G_APPLICATION_H */

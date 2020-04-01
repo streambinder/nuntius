@@ -5,16 +5,16 @@
 #include "g_triggers.h"
 
 static pthread_t thread_id;
-static GActionEntry g_app_entries[] = {{"trigger", g_t_sample, "s", NULL, NULL}};
+static GActionEntry g_app_entries[] = { { "trigger", g_t_sample, "s", NULL, NULL } };
 
 static void g_activate(GApplication *g_app)
 {
 	printf("g_activate enter\n");
 	g_application_hold(g_app);
-	g_action_map_add_action_entries(
-		G_ACTION_MAP(g_app),
-		g_app_entries, G_N_ELEMENTS(g_app_entries),
-		g_app);
+	g_action_map_add_action_entries(G_ACTION_MAP(g_app),
+					g_app_entries,
+					G_N_ELEMENTS(g_app_entries),
+					g_app);
 	g_application_release(g_app);
 	printf("g_activate exit\n");
 }
@@ -54,9 +54,7 @@ extern void g_shutdown(GApplication *g_app)
 	printf("g_shutdown exit\n");
 }
 
-extern void g_notify(GApplication *g_app,
-					 char *g_notify_title,
-					 char *g_notify_body)
+extern void g_notify(GApplication *g_app, char *g_notify_title, char *g_notify_body)
 {
 	printf("g_notify enter\n");
 
