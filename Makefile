@@ -1,9 +1,9 @@
 EXEC     = paperboy
 CC       = gcc
 CFLAGS   = -std=c11 -lpthread -O3 -Wall -Wextra -Wpedantic -Wstrict-aliasing
-CFLAGS  += $(shell pkg-config --cflags gio-2.0)
+CFLAGS  += $(shell pkg-config --cflags gio-2.0 yaml-0.1)
 LDFLAGS  = -pthread
-LDFLAGS += $(shell pkg-config --libs gio-2.0)
+LDFLAGS += $(shell pkg-config --libs gio-2.0 yaml-0.1)
 
 SRC      = $(wildcard src/*.c)
 OBJ      = $(SRC:.c=.o)
