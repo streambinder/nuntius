@@ -17,6 +17,10 @@ src/%.o: src/%.c
 .PHONY: all
 all: $(EXEC)
 
+.PHONY: install
+install: $(EXEC)
+	@install -m 755 $(EXEC) $(HOME)/.local/bin/
+
 .PHONY: clean
 clean:
 	@rm -rf src/*.o $(EXEC)
