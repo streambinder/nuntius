@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
 
 		printf("[paperboy] %s: %d unread\n", config->accounts[i]->address, unread);
 
-		if (unread == 0) {
+		if (unread > 0) {
 			char *notify_title = (char *)calloc(25, sizeof(char *));
 			char *notify_body = (char *)calloc(150, sizeof(char *));
 
