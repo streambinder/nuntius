@@ -8,9 +8,9 @@ static account_t *account_new()
 extern account_t *account_parse(char *address, char *password, char *hostname, char *url)
 {
 	account_t *account = account_new();
-	account->address = address;
-	account->password = password;
-	account->hostname = hostname;
-	account->url = url;
+	account->address = strdup(address);
+	account->password = strdup(password);
+	account->hostname = strdup(hostname);
+	account->url = strdup(url);
 	return account;
 }

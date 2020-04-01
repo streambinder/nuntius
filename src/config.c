@@ -6,10 +6,10 @@
 
 static account_t *config_parse_account_tuple(char *tuple)
 {
-	char *address = strdup(strtok(tuple, ACCOUNT_TUPLE_SEP));
-	char *password = strdup(strtok(NULL, ACCOUNT_TUPLE_SEP));
-	char *hostname = strdup(strtok(NULL, ACCOUNT_TUPLE_SEP));
-	char *url = strdup(strtok(NULL, ACCOUNT_TUPLE_SEP));
+	char *address = strtok(tuple, ACCOUNT_TUPLE_SEP);
+	char *password = strtok(NULL, ACCOUNT_TUPLE_SEP);
+	char *hostname = strtok(NULL, ACCOUNT_TUPLE_SEP);
+	char *url = strtok(NULL, ACCOUNT_TUPLE_SEP);
 	return account_parse(address, password, hostname, url);
 }
 
