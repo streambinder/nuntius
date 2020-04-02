@@ -28,27 +28,23 @@ int main(int argc, char *argv[])
 	}
 
 	if (config_path == NULL) {
-		printf("[paperboy] no configuration file given\n");
+		fprintf(stderr, "[paperboy] no configuration file given\n");
 		return 1;
 	}
 
 	if (access(config_path, F_OK) == -1) {
-		printf("[paperboy] %s: no such file or directory\n", config_path);
+		fprintf(stderr, "[paperboy] %s: no such file or directory\n", config_path);
 		return 1;
 	}
 
 	config_t *config = config_from_yaml(config_path);
-	printf("[paperboy] configuration parsed: %d accounts / %d min scan interval\n",
-	       config->accounts_size,
-	       config->scan_interval);
+	printf("[paperboy] configuration parsed: %d accounts\n", config->accounts_size);
 
 	g_app = g_create("it.davidepucci.PaperBoy");
 	g_run(g_app);
 
 	for (int i = 0; i < config->accounts_size; i++) {
-		int unread = imap_unread(config->accounts[i]->address,
-					 config->accounts[i]->password,
-					 config->accounts[i]->hostname);
+		int unread = imap_unread(config->accounts[i]);
 		if (unread == -1) {
 			continue;
 		}
