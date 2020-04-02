@@ -1,3 +1,4 @@
+#include <curl/curl.h>
 #include <errno.h>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -7,6 +8,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
+#include "account.h"
 #include "imap.h"
 
 static char *first_match(regex_t *r, const char *to_match)
@@ -16,11 +18,12 @@ static char *first_match(regex_t *r, const char *to_match)
 	/* "M" contains the matches found. */
 	regmatch_t m[n_matches];
 	int i = 0;
+
 	int nomatch = regexec(r, to_match, n_matches, m, 0);
 	if (nomatch) {
-		printf("No more matches.\n");
-		return nomatch;
+		return -1;
 	}
+
 	for (i = 1; i < n_matches; i++) {
 		int start;
 		int finish;
@@ -37,76 +40,82 @@ static char *first_match(regex_t *r, const char *to_match)
 	return 0;
 }
 
-extern int imap_unread(char *username, char *password, char *hostname)
+static size_t imap_memory_callback(void *content, size_t size, size_t nmemb, void *userp)
 {
-	struct sockaddr_in server;
-	struct hostent *host;
-	int sock;
+	size_t realsize = size * nmemb;
+	imap_memory_t *mem = (imap_memory_t *)userp;
+	memcpy(&(mem->memory[mem->size]), content, realsize);
+	mem->size += realsize;
+	mem->memory[mem->size + realsize] = 0;
+	return realsize;
+}
 
-	sock = socket(AF_INET, SOCK_STREAM, 0);
-	if (sock == -1) {
-		printf("[imap] unable to create socket: %d.", errno);
+extern int imap_unread(account_t *account)
+{
+	CURL *curl;
+	CURLcode res;
+	imap_memory_t chunk;
+	imap_memory_t header;
+
+	const char *query = "INBOX?UNSEEN";
+	char *url =
+	    malloc(sizeof(char *) * (strlen(account->proto) + 3 + strlen(account->hostname) + 1 +
+				     strlen(account->port) + 1 + strlen(query)));
+	sprintf(url, "%s://%s:%s/%s", account->proto, account->hostname, account->port, query);
+	printf("[imap] url: %s\n", url);
+
+	char *userpwd =
+	    malloc(sizeof(char *) * (strlen(account->address) + 1 + strlen(account->password)));
+	sprintf(userpwd, "%s:%s", account->address, account->password);
+
+	chunk.size = 0;
+	header.size = 0;
+
+	curl = curl_easy_init();
+	if (!curl) {
+		fprintf(stderr, "[imap] unable to initialize curl\n");
 		return -1;
 	}
 
-	server.sin_family = AF_INET;
-	server.sin_port = htons(143);
-	host = gethostbyname(hostname);
-	if (host == NULL) {
-		printf("[imap] unable to resolve %s: %s.", hostname, hstrerror(h_errno));
-		return -1;
-	}
-	memcpy(&server.sin_addr, host->h_addr_list[0], host->h_length);
+	curl_easy_setopt(curl, CURLOPT_USERPWD, userpwd);
+	curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, imap_memory_callback);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
+	curl_easy_setopt(curl, CURLOPT_HEADERDATA, (void *)&header);
+	curl_easy_setopt(curl, CURLOPT_VERBOSE, 0);
+	curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+	curl_easy_setopt(curl, CURLOPT_URL, url);
 
-	if (connect(sock, (struct sockaddr *)&server, sizeof(server)) < 0) {
-		printf("[imap] unable to connect to server %s socket.\n", hostname);
-		return -1;
-	}
-
-	char *message[512];
-	char *buffer[512];
-	for (;;) {
-		int packet_length = recv(sock, buffer, 512, 0);
-		buffer[packet_length] = '\0';
-		if (packet_length != 512) {
-			break;
-		}
-	}
-
-	sprintf(message, "1 LOGIN %s %s\r\n", username, password);
-	if (write(sock, message, strlen(message)) < 0) {
-		printf("[imap] unable to login to %s with user %s.\n", hostname, username);
+	res = curl_easy_perform(curl);
+	if ((res != CURLE_OK) && (res != CURLE_REMOTE_FILE_NOT_FOUND)) {
+		fprintf(stderr, "[imap] unable to query: %s\n", curl_easy_strerror(res));
 		return -1;
 	}
 
-	for (;;) {
-		int packet_length = recv(sock, buffer, 512, 0);
-		buffer[packet_length] = '\0';
-		if (packet_length != 512) {
-			break;
-		}
+	printf("[imap] %lu bytes retrieved\n", (long)chunk.size);
+	if (*chunk.memory != 0) {
+		// printf("[imap] unseen response: \"%s\"\n", chunk.memory);
+		chunk.size = 0;
+		header.size = 0;
 	}
 
-	sprintf(message, "1 STATUS INBOX (UNSEEN)\r\n");
-	if (write(sock, message, strlen(message)) < 0) {
-		printf("[imap] unable to get unread emails.\n");
-		return -1;
-	}
-
-	int packet_length = recv(sock, buffer, 512, 0);
-	buffer[packet_length] = '\0';
-
-	regex_t r;
-	const char *regex_text = ".*\\(UNSEEN ([[:digit:]]+)\\).*";
-	int status = regcomp(&r, regex_text, REG_EXTENDED | REG_NEWLINE);
+	regex_t regex;
+	const char *regex_text = ".*SEARCH ([[:digit:]]+).*";
+	int status = regcomp(&regex, regex_text, REG_EXTENDED | REG_NEWLINE);
 	if (status != 0) {
-		printf("[imap] unable to compile regex '%s'\n", regex_text);
-		return 1;
+		fprintf(stderr, "[imap] unable to compile regex: %s\n", regex_text);
+		return -1;
 	}
 
-	const int unreads = atoi(first_match(&r, buffer));
-	regfree(&r);
-	close(sock);
+	char *match = first_match(&regex, header.memory);
+	if (match == -1) {
+		fprintf(stderr, "[imap] no count match in IMAP response\n");
+		return 0;
+	}
 
+	const int unreads = atoi(match);
+	regfree(&regex);
 	return unreads;
 }
