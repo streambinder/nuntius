@@ -57,7 +57,7 @@ extern void g_notify(GApplication *g_app, char *g_notify_title, char *g_notify_b
 	// notification actions
 	g_notification_set_default_action(notification, "app.go-to-lunch");
 	g_notification_add_button_with_target(notification,
-					      "Trigger",
+					      "Webmail",
 					      "app.trigger",
 					      "s",
 					      g_notify_callback);
