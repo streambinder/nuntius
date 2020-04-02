@@ -9,8 +9,10 @@ static account_t *config_parse_account_tuple(char *tuple)
 	char *address = strtok(tuple, ACCOUNT_TUPLE_SEP);
 	char *password = strtok(NULL, ACCOUNT_TUPLE_SEP);
 	char *hostname = strtok(NULL, ACCOUNT_TUPLE_SEP);
+	char *proto = strtok(NULL, ACCOUNT_TUPLE_SEP);
+	char *port = strtok(NULL, ACCOUNT_TUPLE_SEP);
 	char *url = strtok(NULL, ACCOUNT_TUPLE_SEP);
-	return account_parse(address, password, hostname, url);
+	return account_parse(address, password, hostname, proto, port, url);
 }
 
 static config_t *config_new()
@@ -54,7 +56,9 @@ static config_t *config_parse(char *buffer, size_t length)
 				} else if (!strcmp(token_val, "account")) {
 					token_key = CONFIG_ACCOUNTS;
 				} else {
-					printf("[config] unrecognized key: %s\n", token_val);
+					fprintf(stderr,
+						"[config] unrecognized key: %s\n",
+						token_val);
 				}
 			} else {
 				if (token_key == CONFIG_SCAN_INTERVAL) {

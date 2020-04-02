@@ -5,6 +5,8 @@ typedef struct {
 	char *address;
 	char *password;
 	char *hostname;
+	char *proto;
+	char *port;
 	char *url;
 } account_t;
 
