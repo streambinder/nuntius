@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #include "gtk/g_application.h"
+#include "gtk/g_notification.h"
 
 #include "account.h"
 #include "config.h"
@@ -15,11 +16,12 @@
 #include "paperboy.h"
 
 static GApplication *g_app;
-static char *config_path;
 
 int main(int argc, char *argv[])
 {
 	int opt = 0;
+	char *config_path;
+
 	while ((opt = getopt(argc, argv, "c:")) != -1) {
 		switch (opt) {
 		case 'c':
@@ -44,12 +46,12 @@ int main(int argc, char *argv[])
 	g_app = g_create("it.davidepucci.PaperBoy");
 	g_run(g_app);
 
+	int notifications = 0;
 	for (int i = 0; i < config->accounts_size; i++) {
 		int unread = imap_unread(config->accounts[i]);
 		if (unread == -1) {
 			continue;
 		}
-
 		printf("[paperboy] %s: %d unread\n", config->accounts[i]->address, unread);
 
 		if (unread > 0) {
@@ -59,10 +61,15 @@ int main(int argc, char *argv[])
 			sprintf(notify_title, "Status for %s", config->accounts[i]->address);
 			sprintf(notify_body, "%d emails unread", unread);
 			g_notify(g_app, notify_title, notify_body, config->accounts[i]->url);
+
+			notifications++;
 		}
 	}
 
-	sleep(10);
+	if (notifications) {
+		sleep(10);
+	}
+
 	g_shutdown(g_app);
 	return 0;
 }
