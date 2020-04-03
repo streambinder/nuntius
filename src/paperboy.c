@@ -7,9 +7,10 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "gtk/g_application.h"
+
 #include "account.h"
 #include "config.h"
-#include "g_application.h"
 #include "imap.h"
 #include "paperboy.h"
 
