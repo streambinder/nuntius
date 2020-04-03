@@ -11,6 +11,7 @@ typedef struct {
 	char *url;
 } account_t;
 
+account_t *account_new();
 account_t *account_parse(char *alias, char *address, char *password, char *hostname, char *proto,
 			 char *port, char *url);
 

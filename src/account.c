@@ -2,7 +2,7 @@
 
 #include "account.h"
 
-static account_t *account_new()
+extern account_t *account_new()
 {
 	return (account_t *)malloc(sizeof(account_t));
 }
