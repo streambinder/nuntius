@@ -2,14 +2,12 @@
 #include <pthread.h>
 #include <stdio.h>
 
-#include "g_triggers.h"
+#include "g_trigger.h"
 
 static pthread_t *application;
 
 static pthread_t **workers;
 static size_t workers_size = 0;
-
-static const GActionEntry g_app_entries[] = { { "trigger", g_trigger_webmail, "s", NULL, NULL } };
 
 static void g_activate(GApplication *g_app)
 {
@@ -40,31 +38,6 @@ extern void g_run(GApplication *g_app)
 extern void g_shutdown(GApplication *g_app)
 {
 	g_application_quit(g_app);
-}
-
-extern void g_notify(GApplication *g_app, char *g_notify_title, char *g_notify_body,
-		     char *g_notify_callback)
-{
-	g_application_hold(g_app);
-
-	g_action_map_add_action_entries(G_ACTION_MAP(g_app),
-					g_app_entries,
-					G_N_ELEMENTS(g_app_entries),
-					g_app);
-
-	// notification customizing
-	GNotification *notification = g_notification_new(g_notify_title);
-	g_notification_set_body(notification, g_notify_body);
-	// notification actions
-	g_notification_add_button_with_target(notification,
-					      "Webmail",
-					      "app.trigger",
-					      "s",
-					      g_notify_callback);
-	// notification run
-	g_application_send_notification(g_app, "lunch-is-ready", notification);
-
-	g_application_release(g_app);
 }
 
 extern void g_thread_run(void (*function)(void *), void *params)
