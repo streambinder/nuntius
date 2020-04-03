@@ -55,11 +55,20 @@ int main(int argc, char *argv[])
 		printf("[paperboy] %s: %d unread\n", config->accounts[i]->address, unread);
 
 		if (unread > 0) {
-			char *notify_title = (char *)calloc(25, sizeof(char *));
-			char *notify_body = (char *)calloc(150, sizeof(char *));
+			char *notify_title = (char *)calloc(50, sizeof(char *));
+			char *notify_body = (char *)calloc(50, sizeof(char *));
+			sprintf(notify_title, "%s received new emails", config->accounts[i]->alias);
+			if (unread > 1) {
+				sprintf(notify_body,
+					"%d new emails for %s",
+					unread,
+					config->accounts[i]->address);
+			} else {
+				sprintf(notify_body,
+					"New email for %s",
+					config->accounts[i]->address);
+			}
 
-			sprintf(notify_title, "Status for %s", config->accounts[i]->address);
-			sprintf(notify_body, "%d emails unread", unread);
 			g_notify(g_app,
 				 config->accounts[i]->address,
 				 notify_title,

@@ -6,13 +6,14 @@
 
 static account_t *config_parse_account_tuple(char *tuple)
 {
-	char *address = strtok(tuple, ACCOUNT_TUPLE_SEP);
+	char *alias = strtok(tuple, ACCOUNT_TUPLE_SEP);
+	char *address = strtok(NULL, ACCOUNT_TUPLE_SEP);
 	char *password = strtok(NULL, ACCOUNT_TUPLE_SEP);
 	char *hostname = strtok(NULL, ACCOUNT_TUPLE_SEP);
 	char *proto = strtok(NULL, ACCOUNT_TUPLE_SEP);
 	char *port = strtok(NULL, ACCOUNT_TUPLE_SEP);
 	char *url = strtok(NULL, ACCOUNT_TUPLE_SEP);
-	return account_parse(address, password, hostname, proto, port, url);
+	return account_parse(alias, address, password, hostname, proto, port, url);
 }
 
 static config_t *config_new()
