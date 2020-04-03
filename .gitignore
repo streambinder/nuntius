@@ -1,4 +1,4 @@
 paperboy
 *.yaml
-src/*.o
+*.o
 .vscode
