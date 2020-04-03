@@ -16,4 +16,6 @@ typedef enum {
 
 const static char *ACCOUNT_TUPLE_SEP = "|";
 
+config_t *config_from_yaml(char *filename);
+
 #endif /* CONFIG_H */
