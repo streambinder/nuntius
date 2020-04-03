@@ -1,5 +1,5 @@
-#ifndef ACCOUNT_H
-#define ACCOUNT_H
+#ifndef PAPERBOY_ACCOUNT_H
+#define PAPERBOY_ACCOUNT_H
 
 typedef struct {
 	char *address;
@@ -13,4 +13,4 @@ typedef struct {
 account_t *account_parse(char *address, char *password, char *hostname, char *proto, char *port,
 			 char *url);
 
-#endif /* ACCOUNT_H */
+#endif /* PAPERBOY_ACCOUNT_H */

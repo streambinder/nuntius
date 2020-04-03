@@ -1,5 +1,5 @@
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef PAPERBOY_CONFIG_H
+#define PAPERBOY_CONFIG_H
 
 #include "account.h"
 
@@ -18,4 +18,4 @@ const static char *ACCOUNT_TUPLE_SEP = "|";
 
 config_t *config_from_yaml(char *filename);
 
-#endif /* CONFIG_H */
+#endif /* PAPERBOY_CONFIG_H */

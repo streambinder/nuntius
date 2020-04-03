@@ -1,5 +1,5 @@
-#ifndef IMAP_H
-#define IMAP_H
+#ifndef PAPERBOY_IMAP_H
+#define PAPERBOY_IMAP_H
 
 typedef struct {
 	char memory[100 * 1024];
@@ -8,4 +8,4 @@ typedef struct {
 
 imap_unread(account_t *account);
 
-#endif /* IMAP_H */
+#endif /* PAPERBOY_IMAP_H */
