@@ -41,6 +41,10 @@ int main(int argc, char *argv[])
 	}
 
 	config_t *config = config_from_yaml(config_path);
+	if (config == NULL) {
+		fprintf(stderr, "[paperboy] unable to parse configuration file\n");
+		return 1;
+	}
 	printf("[paperboy] configuration parsed: %d accounts\n", config->accounts_size);
 
 	g_app = g_create("it.davidepucci.PaperBoy");
