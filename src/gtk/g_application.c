@@ -6,9 +6,6 @@
 
 static pthread_t *application;
 
-static pthread_t **workers;
-static size_t workers_size = 0;
-
 const GActionEntry g_triggers[] = { { "trigger", g_trigger_webmail, "s", NULL, NULL } };
 
 static void g_activate(GApplication *g_app)
@@ -44,13 +41,4 @@ extern void g_run(GApplication *g_app)
 extern void g_shutdown(GApplication *g_app)
 {
 	g_application_quit(g_app);
-}
-
-extern void g_thread_run(void (*function)(void *), void *params)
-{
-	pthread_t worker;
-	pthread_create(&worker, NULL, function, params);
-	workers = realloc(workers, (workers_size + 1) * sizeof(pthread_t));
-	workers[workers_size++] = &worker;
-	g_printf("[g_thread_run] subscribed workers: %d\n", workers_size);
 }
