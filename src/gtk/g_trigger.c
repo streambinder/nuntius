@@ -5,7 +5,8 @@ extern void g_worker_webmail(void *params)
 {
 	const char *command = malloc((strlen("xdg-open") + 1 + strlen(params)) * sizeof(char));
 	sprintf(command, "xdg-open %s", params);
-	g_print("[g_worker_webmail] status: %d\n", system(command));
+	g_print("[g_worker_webmail] \"%s\" status: %d\n", command, system(command));
+	free(command);
 }
 
 extern void g_trigger_webmail(GSimpleAction *action, GVariant *parameter, gpointer window)

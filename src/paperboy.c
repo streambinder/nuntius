@@ -60,7 +60,11 @@ int main(int argc, char *argv[])
 
 			sprintf(notify_title, "Status for %s", config->accounts[i]->address);
 			sprintf(notify_body, "%d emails unread", unread);
-			g_notify(g_app, notify_title, notify_body, config->accounts[i]->url);
+			g_notify(g_app,
+				 config->accounts[i]->address,
+				 notify_title,
+				 notify_body,
+				 config->accounts[i]->url);
 
 			notifications++;
 		}

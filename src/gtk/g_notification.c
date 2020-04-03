@@ -3,18 +3,9 @@
 #include "g_notification.h"
 #include "g_trigger.h"
 
-const GActionEntry g_triggers[] = { { "trigger", g_trigger_webmail, "s", NULL, NULL } };
-
-extern void g_notify(GApplication *g_app, char *g_notify_title, char *g_notify_body,
-		     char *g_notify_callback)
+extern void g_notify(GApplication *g_app, char *g_notify_id, char *g_notify_title,
+		     char *g_notify_body, char *g_notify_callback)
 {
-	g_application_hold(g_app);
-
-	g_action_map_add_action_entries(G_ACTION_MAP(g_app),
-					g_triggers,
-					G_N_ELEMENTS(g_triggers),
-					g_app);
-
 	// notification customizing
 	GNotification *notification = g_notification_new(g_notify_title);
 	g_notification_set_body(notification, g_notify_body);
@@ -24,8 +15,11 @@ extern void g_notify(GApplication *g_app, char *g_notify_title, char *g_notify_b
 					      "app.trigger",
 					      "s",
 					      g_notify_callback);
-	// notification run
-	g_application_send_notification(g_app, NULL, notification);
 
-	g_application_release(g_app);
+	// notification run
+	g_application_withdraw_notification(g_app, (gchar *)strdup(g_notify_id));
+	g_application_send_notification(g_app, (gchar *)strdup(g_notify_id), notification);
+
+	g_dbus_connection_flush_sync(g_application_get_dbus_connection(g_app), NULL, NULL);
+	g_object_unref(notification);
 }

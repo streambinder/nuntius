@@ -9,10 +9,16 @@ static pthread_t *application;
 static pthread_t **workers;
 static size_t workers_size = 0;
 
+const GActionEntry g_triggers[] = { { "trigger", g_trigger_webmail, "s", NULL, NULL } };
+
 static void g_activate(GApplication *g_app)
 {
+	g_action_map_add_action_entries(G_ACTION_MAP(g_app),
+					g_triggers,
+					G_N_ELEMENTS(g_triggers),
+					g_app);
+
 	g_application_hold(g_app);
-	// init routines
 	g_application_release(g_app);
 }
 
