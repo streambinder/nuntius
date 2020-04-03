@@ -25,7 +25,7 @@ extern void g_notify(GApplication *g_app, char *g_notify_title, char *g_notify_b
 					      "s",
 					      g_notify_callback);
 	// notification run
-	g_application_send_notification(g_app, "lunch-is-ready", notification);
+	g_application_send_notification(g_app, NULL, notification);
 
 	g_application_release(g_app);
 }
