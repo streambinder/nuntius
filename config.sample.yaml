@@ -1,1 +1,8 @@
-account: "Name|email@addre.ss|pa$$word|imap.host.name|imaps|993|https://url.to/webmail"
+accounts:
+  - alias: "Name"
+    address: "email@addre.ss"
+    password: "pa$$word"
+    hostname: "imap.host.name"
+    proto: "imaps"
+    port: "993"
+    url: "https://url.to/webmail"
