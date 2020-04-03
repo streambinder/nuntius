@@ -23,4 +23,4 @@ install: $(EXEC)
 
 .PHONY: clean
 clean:
-	@rm -rf src/*.o $(EXEC)
+	@rm -rf src/*.o src/gtk/*.o $(EXEC)
