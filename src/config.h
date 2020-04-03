@@ -11,10 +11,12 @@ typedef struct {
 
 typedef enum {
 	CONFIG_ACCOUNTS,
-	CONFIG_SCAN_INTERVAL,
-} config_field_e;
+} config_parents_e;
 
-const static char *ACCOUNT_TUPLE_SEP = "|";
+typedef enum {
+	CONFIG_TYPE_STR,
+	CONFIG_TYPE_INT,
+} config_type_e;
 
 config_t *config_from_yaml(char *filename);
 

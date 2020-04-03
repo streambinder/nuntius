@@ -4,18 +4,6 @@
 
 #include "config.h"
 
-static account_t *config_parse_account_tuple(char *tuple)
-{
-	char *alias = strtok(tuple, ACCOUNT_TUPLE_SEP);
-	char *address = strtok(NULL, ACCOUNT_TUPLE_SEP);
-	char *password = strtok(NULL, ACCOUNT_TUPLE_SEP);
-	char *hostname = strtok(NULL, ACCOUNT_TUPLE_SEP);
-	char *proto = strtok(NULL, ACCOUNT_TUPLE_SEP);
-	char *port = strtok(NULL, ACCOUNT_TUPLE_SEP);
-	char *url = strtok(NULL, ACCOUNT_TUPLE_SEP);
-	return account_parse(alias, address, password, hostname, proto, port, url);
-}
-
 static config_t *config_new()
 {
 	config_t *config = (struct config_t *)malloc(sizeof(config_t));
@@ -36,8 +24,12 @@ static config_t *config_parse(char *buffer, size_t length)
 	yaml_parser_set_input_string(&parser, buffer, length);
 
 	int is_value = 0;
+	int token_parent;
+	int token_key_type;
 	char *token_val;
-	char token_key;
+	char **token_dst;
+
+	account_t *account = NULL;
 
 	do {
 		yaml_parser_scan(&parser, &token);
@@ -49,28 +41,72 @@ static config_t *config_parse(char *buffer, size_t length)
 		case YAML_VALUE_TOKEN:
 			is_value = 1;
 			break;
+		case YAML_BLOCK_END_TOKEN:
+			if (token_parent == CONFIG_ACCOUNTS && account != NULL) {
+				config->accounts =
+				    realloc(config->accounts,
+					    (config->accounts_size + 1) * sizeof(account_t));
+				config->accounts[config->accounts_size++] = account;
+				account = NULL;
+			}
+			break;
+		case YAML_BLOCK_ENTRY_TOKEN:
+			if (token_parent == CONFIG_ACCOUNTS) {
+				account = account_new();
+			}
+			break;
 		case YAML_SCALAR_TOKEN:
 			token_val = token.data.scalar.value;
 			if (is_value == 0) {
-				if (!strcmp(token_val, "scan_interval")) {
-					token_key = CONFIG_SCAN_INTERVAL;
-				} else if (!strcmp(token_val, "account")) {
-					token_key = CONFIG_ACCOUNTS;
+				if (!strcmp(token_val, "accounts")) {
+					token_parent = CONFIG_ACCOUNTS;
+				} else if (!strcmp(token_val, "scan_interval")) {
+					token_parent = NULL;
+					token_dst = &config->scan_interval;
+					token_key_type = CONFIG_TYPE_INT;
+				} else if (token_parent == CONFIG_ACCOUNTS &&
+					   !strcmp(token_val, "alias")) {
+					token_dst = &account->alias;
+					token_key_type = CONFIG_TYPE_STR;
+				} else if (token_parent == CONFIG_ACCOUNTS &&
+					   !strcmp(token_val, "address")) {
+					token_dst = &account->address;
+					token_key_type = CONFIG_TYPE_STR;
+				} else if (token_parent == CONFIG_ACCOUNTS &&
+					   !strcmp(token_val, "password")) {
+					token_dst = &account->password;
+					token_key_type = CONFIG_TYPE_STR;
+				} else if (token_parent == CONFIG_ACCOUNTS &&
+					   !strcmp(token_val, "hostname")) {
+					token_dst = &account->hostname;
+					token_key_type = CONFIG_TYPE_STR;
+				} else if (token_parent == CONFIG_ACCOUNTS &&
+					   !strcmp(token_val, "proto")) {
+					token_dst = &account->proto;
+					token_key_type = CONFIG_TYPE_STR;
+				} else if (token_parent == CONFIG_ACCOUNTS &&
+					   !strcmp(token_val, "port")) {
+					token_dst = &account->port;
+					token_key_type = CONFIG_TYPE_STR;
+				} else if (token_parent == CONFIG_ACCOUNTS &&
+					   !strcmp(token_val, "url")) {
+					token_dst = &account->url;
+					token_key_type = CONFIG_TYPE_STR;
 				} else {
 					fprintf(stderr,
 						"[config] unrecognized key: %s\n",
 						token_val);
+					return NULL;
 				}
 			} else {
-				if (token_key == CONFIG_SCAN_INTERVAL) {
-					config->scan_interval =
-					    strtol(token_val, (char **)NULL, 10);
-				} else if (token_key == CONFIG_ACCOUNTS) {
-					account_t *account = config_parse_account_tuple(token_val);
-					config->accounts = realloc(config->accounts,
-								   (config->accounts_size + 1) *
-								       sizeof(account_t));
-					config->accounts[config->accounts_size++] = account;
+				switch (token_key_type) {
+				case CONFIG_TYPE_INT:
+					*token_dst = strtol(token_val, (char **)NULL, 10);
+					break;
+				case CONFIG_TYPE_STR:
+				default:
+					*token_dst = strdup(token_val);
+					break;
 				}
 			}
 			break;
