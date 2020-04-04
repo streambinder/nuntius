@@ -6,6 +6,6 @@ typedef struct {
 	size_t size;
 } imap_memory_t;
 
-imap_unread(account_t *account);
+int imap_unread(account_t *account);
 
 #endif /* PAPERBOY_IMAP_H */

@@ -4,6 +4,7 @@
 #include <netinet/in.h>
 #include <regex.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -11,7 +12,7 @@
 #include "account.h"
 #include "imap.h"
 
-static char *first_match(regex_t *r, const char *to_match)
+static char *first_match(regex_t *r, char *to_match)
 {
 	/* "N_matches" is the maximum number of matches allowed. */
 	const int n_matches = 10;
@@ -21,7 +22,7 @@ static char *first_match(regex_t *r, const char *to_match)
 
 	int nomatch = regexec(r, to_match, n_matches, m, 0);
 	if (nomatch) {
-		return -1;
+		return NULL;
 	}
 
 	for (i = 1; i < n_matches; i++) {
@@ -37,7 +38,7 @@ static char *first_match(regex_t *r, const char *to_match)
 		_str[_strlen] = '\0';
 		return _str;
 	}
-	return 0;
+	return NULL;
 }
 
 static size_t imap_memory_callback(void *content, size_t size, size_t nmemb, void *userp)
@@ -110,12 +111,12 @@ extern int imap_unread(account_t *account)
 	}
 
 	char *match = first_match(&regex, header.memory);
-	if (match == -1) {
+	if (match == NULL) {
 		fprintf(stderr, "[imap] no count match in IMAP response\n");
 		return 0;
 	}
 
-	const int unreads = atoi(match);
+	const int unreads = strtol(match, (char **)NULL, 10);
 	regfree(&regex);
 	return unreads;
 }
