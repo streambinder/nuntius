@@ -1,6 +1,6 @@
 EXEC     = paperboy
 CC       = gcc
-CFLAGS   = -std=c11 -lpthread -O3 -Wall -Wextra -Wpedantic -Wstrict-aliasing
+CFLAGS   = -O3 -Wall
 CFLAGS  += $(shell pkg-config --cflags gio-2.0 yaml-0.1 libcurl)
 LDFLAGS  = -pthread
 LDFLAGS += $(shell pkg-config --libs gio-2.0 yaml-0.1 libcurl)
