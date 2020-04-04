@@ -20,7 +20,7 @@ static GApplication *g_app;
 int main(int argc, char *argv[])
 {
 	int opt = 0;
-	char *config_path;
+	char *config_path = NULL;
 
 	while ((opt = getopt(argc, argv, "c:")) != -1) {
 		switch (opt) {
