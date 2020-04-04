@@ -18,8 +18,14 @@ src/%.o: src/%.c
 all: $(EXEC)
 
 .PHONY: install
+ifndef DESTDIR
 install: $(EXEC)
-	@install -m 755 $(EXEC) $(HOME)/.local/bin/
+	@mkdir -p $(HOME)/.local/bin
+	install -m 755 $(EXEC) $(HOME)/.local/bin
+else
+install: $(EXEC)
+	install -m 755 $(EXEC) $(DESTDIR)/usr/sbin
+endif
 
 .PHONY: clean
 clean:
