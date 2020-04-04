@@ -4,8 +4,6 @@
 
 #include "g_trigger.h"
 
-static pthread_t *application;
-
 const GActionEntry g_triggers[] = { { "trigger", g_trigger_webmail, "s", NULL, NULL } };
 
 static void g_activate(GApplication *g_app)
@@ -21,7 +19,7 @@ static void g_activate(GApplication *g_app)
 
 static void g_fork(GApplication *g_app)
 {
-	g_application_run(g_app, NULL, NULL);
+	g_application_run(g_app, 0, NULL);
 	g_object_unref(g_app);
 }
 
@@ -35,7 +33,8 @@ extern GApplication *g_create(char *g_name)
 
 extern void g_run(GApplication *g_app)
 {
-	pthread_create(&application, NULL, &g_fork, g_app);
+	pthread_t application;
+	pthread_create(&application, NULL, (void *)&g_fork, g_app);
 }
 
 extern void g_shutdown(GApplication *g_app)
