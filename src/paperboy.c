@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (notifications) {
-		sleep(30);
+		sleep(5);
 	}
 
 	g_shutdown(g_app);
