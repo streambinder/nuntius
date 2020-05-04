@@ -137,7 +137,7 @@ extern config_t *config_from_yaml(char *filename)
 		fseek(file, 0, SEEK_SET);
 		buffer = malloc(length);
 		if (buffer) {
-			fread(buffer, 1, length, file);
+			(void)fread(buffer, 1, length, file);
 		}
 		fclose(file);
 	}
