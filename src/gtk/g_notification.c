@@ -1,25 +1,43 @@
-#include <gio/gio.h>
+#include <libnotify/notify.h>
 
 #include "g_notification.h"
-#include "g_trigger.h"
 
-extern void g_notify(GApplication *g_app, char *g_notify_id, char *g_notify_title,
-		     char *g_notify_body, char *g_notify_callback)
+static void g_notify_callback(NotifyNotification *notification, char *action, gpointer data)
 {
-	// notification customizing
-	GNotification *notification = g_notification_new(g_notify_title);
-	g_notification_set_body(notification, g_notify_body);
-	// notification actions
-	g_notification_add_button_with_target(notification,
-					      "Webmail",
-					      "app.trigger",
-					      "s",
-					      g_notify_callback);
+	char *command[] = { "xdg-open", data, NULL };
+	g_autoptr(GError) error = NULL;
+	g_spawn_async(NULL,
+		      command,
+		      NULL,
+		      G_SPAWN_DO_NOT_REAP_CHILD | G_SPAWN_SEARCH_PATH,
+		      NULL,
+		      NULL,
+		      NULL,
+		      &error);
 
-	// notification run
-	g_application_withdraw_notification(g_app, (gchar *)strdup(g_notify_id));
-	g_application_send_notification(g_app, (gchar *)strdup(g_notify_id), notification);
+	if (error != NULL) {
+		g_error("[g_notify_callback] unable to fork: %s", error->message);
+		return;
+	}
+}
 
-	g_dbus_connection_flush_sync(g_application_get_dbus_connection(g_app), NULL, NULL);
-	g_object_unref(notification);
+extern void g_notify(const char *app_name, char *notify_title, char *notify_body, char *url)
+{
+	if (!notify_is_initted()) {
+		notify_init(app_name);
+	}
+
+	NotifyNotification *n =
+	    notify_notification_new(notify_title, notify_body, G_PAPERBOY_NOTIFY_ICON);
+	notify_notification_add_action(n,
+				       "webmail",
+				       "Webmail",
+				       NOTIFY_ACTION_CALLBACK(g_notify_callback),
+				       (gpointer *)url,
+				       NULL);
+	notify_notification_set_timeout(n, G_PAPERBOY_NOTIFY_TIMEOUT);
+	notify_notification_show(n, NULL);
+
+	free(notify_title);
+	free(notify_body);
 }

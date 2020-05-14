@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 	}
 	printf("[paperboy] configuration parsed: %d accounts\n", config->accounts_size);
 
-	g_app = g_create("it.davidepucci.PaperBoy");
+	g_app = g_create(APP_NAME);
 	g_run(g_app);
 
 	int notifications = 0;
@@ -73,20 +73,17 @@ int main(int argc, char *argv[])
 					config->accounts[i]->address);
 			}
 
-			g_notify(g_app,
-				 config->accounts[i]->address,
-				 notify_title,
-				 notify_body,
-				 config->accounts[i]->url);
+			g_notify(APP_NAME, notify_title, notify_body, config->accounts[i]->url);
 
 			notifications++;
 		}
 	}
 
+	uint delay = 0;
 	if (notifications) {
-		sleep(5);
+		delay = G_PAPERBOY_NOTIFY_TIMEOUT;
 	}
 
-	g_shutdown(g_app);
+	g_shutdown(g_app, delay);
 	return 0;
 }

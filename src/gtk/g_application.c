@@ -2,17 +2,8 @@
 #include <pthread.h>
 #include <stdio.h>
 
-#include "g_trigger.h"
-
-const GActionEntry g_triggers[] = { { "trigger", g_trigger_webmail, "s", NULL, NULL } };
-
 static void g_activate(GApplication *g_app)
 {
-	g_action_map_add_action_entries(G_ACTION_MAP(g_app),
-					g_triggers,
-					G_N_ELEMENTS(g_triggers),
-					g_app);
-
 	g_application_hold(g_app);
 	g_application_release(g_app);
 }
@@ -37,7 +28,8 @@ extern void g_run(GApplication *g_app)
 	pthread_create(&application, NULL, (void *)&g_fork, g_app);
 }
 
-extern void g_shutdown(GApplication *g_app)
+extern void g_shutdown(GApplication *g_app, uint delay)
 {
+	sleep(delay);
 	g_application_quit(g_app);
 }
