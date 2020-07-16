@@ -4,21 +4,7 @@
 
 static void g_notify_callback(NotifyNotification *notification, char *action, gpointer data)
 {
-	char *command[] = { "xdg-open", data, NULL };
-	g_autoptr(GError) error = NULL;
-	g_spawn_async(NULL,
-		      command,
-		      NULL,
-		      G_SPAWN_DO_NOT_REAP_CHILD | G_SPAWN_SEARCH_PATH,
-		      NULL,
-		      NULL,
-		      NULL,
-		      &error);
-
-	if (error != NULL) {
-		g_error("[g_notify_callback] unable to fork: %s", error->message);
-		return;
-	}
+	g_app_info_launch_default_for_uri_async(data, NULL, NULL, NULL, NULL);
 }
 
 extern void g_notify(const char *app_name, char *notify_title, char *notify_body, char *url)
