@@ -5,7 +5,7 @@ CFLAGS  += $(shell pkg-config --cflags gio-2.0 libnotify yaml-0.1 libcurl)
 LDFLAGS  = -pthread
 LDFLAGS += $(shell pkg-config --libs gio-2.0 libnotify yaml-0.1 libcurl)
 
-SRC      = $(wildcard src/gtk/*.c) $(wildcard src/*.c)
+SRC      = $(wildcard src/*.c)
 OBJ      = $(SRC:.c=.o)
 
 ${EXEC}: $(OBJ)
@@ -29,4 +29,4 @@ endif
 
 .PHONY: clean
 clean:
-	@rm -rf src/*.o src/gtk/*.o $(EXEC)
+	@rm -rf src/*.o $(EXEC)
