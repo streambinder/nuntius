@@ -28,8 +28,7 @@ extern void g_run(GApplication *g_app)
 	pthread_create(&application, NULL, (void *)&g_fork, g_app);
 }
 
-extern void g_shutdown(GApplication *g_app, uint delay)
+extern void g_shutdown(GApplication *g_app)
 {
-	sleep(delay);
 	g_application_quit(g_app);
 }

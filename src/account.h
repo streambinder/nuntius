@@ -9,6 +9,8 @@ typedef struct {
 	char *proto;
 	char *port;
 	char *url;
+
+	uint notification_id;
 } account_t;
 
 account_t *account_new();
