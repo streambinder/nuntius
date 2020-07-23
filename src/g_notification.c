@@ -6,6 +6,7 @@
 static void g_notify_callback(NotifyNotification *notification, char *action, gpointer data)
 {
 	g_app_info_launch_default_for_uri_async(data, NULL, NULL, NULL, NULL);
+	g_object_unref(G_OBJECT(notification));
 }
 
 extern void g_notify(const char *app_name, account_t *account, char *notify_title,
@@ -35,7 +36,4 @@ extern void g_notify(const char *app_name, account_t *account, char *notify_titl
 
 	free(notify_title);
 	free(notify_body);
-
-	g_object_unref(G_OBJECT(n));
-	notify_uninit();
 }
