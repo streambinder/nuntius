@@ -1,5 +1,5 @@
-#ifndef PAPERBOY_CONFIG_H
-#define PAPERBOY_CONFIG_H
+#ifndef NUNTIUS_CONFIG_H
+#define NUNTIUS_CONFIG_H
 
 #include "account.h"
 
@@ -20,4 +20,4 @@ typedef enum {
 
 config_t *config_from_yaml(char *filename);
 
-#endif /* PAPERBOY_CONFIG_H */
+#endif /* NUNTIUS_CONFIG_H */

@@ -17,7 +17,7 @@ extern void g_notify(const char *app_name, account_t *account, char *notify_titl
 	}
 
 	NotifyNotification *n =
-	    notify_notification_new(notify_title, notify_body, G_PAPERBOY_NOTIFY_ICON);
+	    notify_notification_new(notify_title, notify_body, G_NUNTIUS_NOTIFY_ICON);
 	notify_notification_set_app_name(n, app_name);
 	if (account->notification_id > 0) {
 		g_object_set(n, "id", account->notification_id, NULL);

@@ -1,5 +1,5 @@
-#ifndef PAPERBOY_ACCOUNT_H
-#define PAPERBOY_ACCOUNT_H
+#ifndef NUNTIUS_ACCOUNT_H
+#define NUNTIUS_ACCOUNT_H
 
 typedef struct {
 	char *alias;
@@ -17,4 +17,4 @@ account_t *account_new();
 account_t *account_parse(char *alias, char *address, char *password, char *hostname, char *proto,
 			 char *port, char *url);
 
-#endif /* PAPERBOY_ACCOUNT_H */
+#endif /* NUNTIUS_ACCOUNT_H */

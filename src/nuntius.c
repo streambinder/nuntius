@@ -13,7 +13,7 @@
 #include "g_application.h"
 #include "g_notification.h"
 #include "imap.h"
-#include "paperboy.h"
+#include "nuntius.h"
 
 static GApplication *g_app;
 static volatile int shutdown = 0;
@@ -41,22 +41,22 @@ int main(int argc, char *argv[])
 	}
 
 	if (config_path == NULL) {
-		fprintf(stderr, "[paperboy] no configuration file given\n");
+		fprintf(stderr, "[nuntius] no configuration file given\n");
 		return 1;
 	}
 
 	if (access(config_path, F_OK) == -1) {
-		fprintf(stderr, "[paperboy] %s: no such file or directory\n", config_path);
+		fprintf(stderr, "[nuntius] %s: no such file or directory\n", config_path);
 		return 1;
 	}
 
 	config_t *config = config_from_yaml(config_path);
 	if (config == NULL) {
-		fprintf(stderr, "[paperboy] unable to parse configuration file\n");
+		fprintf(stderr, "[nuntius] unable to parse configuration file\n");
 		return 1;
 	}
-	printf("[paperboy] configuration parsed: %d accounts\n", config->accounts_size);
-	printf("[paperboy] check interval: %ds\n", interval);
+	printf("[nuntius] configuration parsed: %d accounts\n", config->accounts_size);
+	printf("[nuntius] check interval: %ds\n", interval);
 
 	signal(SIGINT, sigint_handler);
 	g_app = g_create(APP_NAME);
@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 			if (unread == -1) {
 				continue;
 			}
-			printf("[paperboy] %s: %d unread\n", config->accounts[i]->address, unread);
+			printf("[nuntius] %s: %d unread\n", config->accounts[i]->address, unread);
 
 			if (unread > 0) {
 				char *notify_title = (char *)calloc(50, sizeof(char *));

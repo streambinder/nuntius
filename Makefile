@@ -1,4 +1,4 @@
-EXEC     = paperboy
+EXEC     = nuntius
 CC       = gcc
 CFLAGS   = -O3 -Wall
 CFLAGS  += $(shell pkg-config --cflags gio-2.0 libnotify yaml-0.1 libcurl)
